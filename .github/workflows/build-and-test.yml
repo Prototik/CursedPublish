@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gradle: [ '8.6-rc-1', '8.5', '8.0.2', '7.0.2', '6.9.3', '6.0.1' ]
+        gradle: [ '8.6-rc-1', '8.5', '8.0.2', '7.0.2', '6.9.3', '6.8.3' ]
         java: [ 8, 11, 17, 21 ]
         exclude:
           - { gradle: '8.0.2', java: 21 }
@@ -45,8 +45,8 @@ jobs:
           - { gradle: '7.0.2', java: 17 }
           - { gradle: '6.9.3', java: 21 }
           - { gradle: '6.9.3', java: 17 }
-          - { gradle: '6.0.1', java: 21 }
-          - { gradle: '6.0.1', java: 17 }
+          - { gradle: '6.8.3', java: 21 }
+          - { gradle: '6.8.3', java: 17 }
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
