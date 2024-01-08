@@ -1,0 +1,16 @@
+name: Submit Dependency Graph
+
+on:
+  workflow_run:
+    workflows: [Build]
+    types: [completed]
+
+jobs:
+  submit-dependency-graph:
+    name: Submit Dependency Graph
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve dependency graph artifact and submit
+        uses: gradle/gradle-build-action@v2
+        with:
+          dependency-graph: download-and-submit

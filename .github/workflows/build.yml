@@ -32,10 +32,13 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: ${{ matrix.gradle }}
+          dependency-graph: generate
+          artifact-retention-days: 1
       - name: Build
-        run: ./gradlew -s build
+        run: gradle -s build --scan
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
         if: always()
         with:
           report_paths: '**/build/test-results/*/TEST-*.xml'
+          check_name: "JUnit Test Report (Gradle ${{ matrix.gradle }}, Java ${{ matrix.java }})"
