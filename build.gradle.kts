@@ -27,6 +27,7 @@ tasks.withType<KotlinJvmCompile>().configureEach {
         languageVersion = KotlinVersion.KOTLIN_1_8
         jvmTarget = JvmTarget.JVM_1_8
         javaParameters = true
+        allWarningsAsErrors = true
         freeCompilerArgs.addAll(
             "-Xlambdas=indy",
             "-Xjvm-default=all",
@@ -105,6 +106,8 @@ testing {
                             languageVersion = JavaLanguageVersion.of(javaVersion)
                         }
                     }
+
+                    outputs.upToDateWhen { System.getenv("CI") == null }
                 }
             }
         }
