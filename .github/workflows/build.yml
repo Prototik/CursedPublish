@@ -32,8 +32,6 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: ${{ matrix.gradle }}
-          dependency-graph: generate
-          artifact-retention-days: 1
       - name: Build
         run: gradle -s build --scan
       - name: Publish Test Report
