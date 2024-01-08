@@ -1,0 +1,35 @@
+[versions]
+annotations = "24.1.0"
+kotest = "5.8.0"
+kotest-extensions-mockserver = "1.3.0"
+ktor = "2.3.7"
+
+[libraries]
+annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
+kotest-extensions-htmlreporter = { module = "io.kotest:kotest-extensions-htmlreporter", version.ref = "kotest" }
+kotest-extensions-junitxml = { module = "io.kotest:kotest-extensions-junitxml", version.ref = "kotest" }
+kotest-extensions-mockserver = { module = "io.kotest.extensions:kotest-extensions-mockserver", version.ref = "kotest-extensions-mockserver" }
+kotest-framework-datatest = { module = "io.kotest:kotest-framework-datatest-jvm", version.ref = "kotest" }
+kotest-property = { module = "io.kotest:kotest-property-jvm", version.ref = "kotest" }
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
+ktor-client-apache5 = { module = "io.ktor:ktor-client-apache5-jvm", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation-jvm", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core-jvm", version.ref = "ktor" }
+ktor-client-encoding = { module = "io.ktor:ktor-client-encoding-jvm", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock-jvm", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
+
+[bundles]
+kotest = [
+    "kotest-assertions-core",
+    "kotest-extensions-htmlreporter",
+    "kotest-extensions-junitxml",
+    "kotest-extensions-mockserver",
+    "kotest-framework-datatest",
+    "kotest-property",
+    "kotest-runner-junit5",
+]
+
+[plugins]
+plugin-publish = { id = "com.gradle.plugin-publish", version = "1.2.1"}

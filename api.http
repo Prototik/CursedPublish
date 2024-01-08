@@ -1,0 +1,12 @@
+### Get version types
+GET https://minecraft.curseforge.com/api/game/version-types
+Accept: application/json
+Accept-Charset: utf-8
+X-Api-Token: {{token}}
+
+### Get versions
+GET https://minecraft.curseforge.com/api/game/versions
+Accept: application/json
+Accept-Charset: utf-8
+X-Api-Token: {{token}}
+
