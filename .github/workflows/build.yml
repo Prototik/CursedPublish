@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        gradle: [ '8.6-rc-1', '8.5', '8.0.2', '7.0.2' ]
-        java: [ 8, 11, 17, 21 ]
+        gradle: [ '8.6-rc-1', '8.5', '8.0.2', '7.0.2', '6.9' ]
+        java: [ 8, 11 ]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
