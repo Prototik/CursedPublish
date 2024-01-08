@@ -7,11 +7,9 @@ import io.kotest.matchers.*
 import io.kotest.matchers.nulls.*
 import io.kotest.matchers.string.*
 import org.gradle.testkit.runner.*
-import org.gradle.util.*
 import org.mockserver.integration.*
 import org.mockserver.model.*
 import org.mockserver.verify.*
-import rocks.aur.cursed.publish.test.internal.*
 import rocks.aur.cursed.publish.test.models.*
 import java.io.*
 
@@ -82,11 +80,16 @@ sealed class GradleBuildScriptSpec(
     test("publication successful") {
         writeProject(projectDir, "http://localhost:${clientAndServer.port}")
 
-        val result = GradleRunner.create()
+        val runner = GradleRunner.create()
             .withProjectDir(projectDir)
             .withPluginClasspath()
             .withArguments(":curseforgeUploadJarFile", "--warning-mode", "all")
-            .build()
+
+        System.getenv("CURSED_PUBLISH_TEST_GRADLE_VERSION")?.let { gradleVersion ->
+            runner.withGradleVersion(gradleVersion)
+        }
+
+        val result = runner.build()
 
         result.output shouldNotContain "Deprecated Gradle features were used in this build"
 
@@ -138,12 +141,7 @@ object KotlinGradleBuildScriptSpec : GradleBuildScriptSpec({ projectDir, apiBase
                     beta()
                 }
             }
-        }
-                        
-        afterEvaluate { 
-            println("Java version: ${'$'}{JavaVersion.current().majorVersion}")
-            println("Gradle version: ${'$'}{gradle.gradleVersion}")
-        }
+        }                        
         """.trimIndent()
     )
 
@@ -192,12 +190,7 @@ object GroovyGradleBuildScriptSpec : GradleBuildScriptSpec({ projectDir, apiBase
                     beta()
                 }
             }
-        }
-                                        
-        afterEvaluate { 
-            println("Java version: ${'$'}{JavaVersion.current().majorVersion}")
-            println("Gradle version: ${'$'}{gradle.gradleVersion}")
-        }
+        }                                        
         """.trimIndent()
     )
 

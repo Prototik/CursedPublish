@@ -99,6 +99,12 @@ testing {
                         junitXml.required = false
                         html.required = false
                     }
+
+                    System.getenv("CURSED_PUBLISH_TEST_JAVA_VERSION")?.let { javaVersion ->
+                        javaLauncher = javaToolchains.launcherFor {
+                            languageVersion = JavaLanguageVersion.of(javaVersion)
+                        }
+                    }
                 }
             }
         }
