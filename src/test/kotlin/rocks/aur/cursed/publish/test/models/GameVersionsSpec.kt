@@ -2,18 +2,17 @@ package rocks.aur.cursed.publish.test.models
 
 import io.kotest.core.spec.style.*
 import io.kotest.matchers.*
-import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import rocks.aur.cursed.publish.*
 import rocks.aur.cursed.publish.internal.*
 import rocks.aur.cursed.publish.internal.model.*
 import java.io.*
 
-@OptIn(ExperimentalSerializationApi::class, CursedInternalApi::class)
+@OptIn(CursedInternalApi::class)
 object GameVersionsSpec : FunSpec({
     test("serialization") {
         val types = JsonArray(GameVersionsSpec.stream().use { stream ->
-            CursedJson.decodeFromStream<JsonArray>(stream)
+            CursedJson.decodeFromString<JsonArray>(stream.bufferedReader().readText())
         }.map {
             when (it) {
                 is JsonObject -> JsonObject(it - "apiVersion")
