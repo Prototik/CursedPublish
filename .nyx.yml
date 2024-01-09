@@ -37,6 +37,6 @@ services:
     type: GITHUB
     options:
       AUTHENTICATION_TOKEN: "{{#environmentVariable}}GITHUB_TOKEN{{/environmentVariable}}"
-      REPOSITORY_NAME: "{{#environmentVariable}}GITHUB_REPOSITORY_OWNER{{/environmentVariable}}"
-      REPOSITORY_OWNER: "CursedPublish"
+      REPOSITORY_OWNER: "{{#environmentVariable}}GITHUB_REPOSITORY_OWNER{{/environmentVariable}}"
+      REPOSITORY_NAME: "CursedPublish"
 stateFile: "build/.nyx-state.json"
