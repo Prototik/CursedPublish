@@ -21,17 +21,33 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version-file: .java-version
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: wrapper
+      - name: Cache build files
+        uses: actions/cache@v3
+        with:
+          path: '**/build/'
+          key: pipeline-${{ github.run_id }}-gradle-build-cache
+      - name: Init with Gradle
+        run: ./gradlew nyxInfer --stacktrace
       - name: Load Nyx data
         id: nyx
         uses: mooltiverse/nyx-github-action@main
         with:
           command: infer
-          resume: false
+          resume: true
       - name: Archive Nyx state file
         uses: actions/upload-artifact@v3
         if: ${{ always() }}
         with:
-          name: .nyx-state-${{ github.job }}.json
+          name: .nyx-state.json
           path: build/.nyx-state.json
   build:
     name: Build & Unit tests

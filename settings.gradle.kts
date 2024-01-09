@@ -13,7 +13,6 @@ rootProject.name = "cursedpublish"
 include(":testlib")
 
 extensions.configure<NyxExtension>("nyx") {
-    configurationFile = ".nyx.yml"
     resume = System.getenv("NYX_RESUME") == "true"
 }
 
