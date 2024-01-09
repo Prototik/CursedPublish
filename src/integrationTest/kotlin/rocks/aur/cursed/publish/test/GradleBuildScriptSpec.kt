@@ -46,7 +46,7 @@ sealed class GradleBuildScriptSpec(
             `when`(gameVersionTypesRequest).respond(
                 HttpResponse.response()
                     .withBody(
-                        GameVersionTypesSpec.stream().bufferedReader().readText(),
+                        ModelFixtures.gameVersionTypes().bufferedReader().readText(),
                         MediaType.APPLICATION_JSON_UTF_8
                     )
             )
@@ -54,7 +54,7 @@ sealed class GradleBuildScriptSpec(
             `when`(gameVersionsRequest).respond(
                 HttpResponse.response()
                     .withBody(
-                        GameVersionsSpec.stream().bufferedReader().readText(),
+                        ModelFixtures.gameVersions().bufferedReader().readText(),
                         MediaType.APPLICATION_JSON_UTF_8
                     )
             )

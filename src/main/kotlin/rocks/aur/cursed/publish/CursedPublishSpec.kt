@@ -2,7 +2,7 @@ package rocks.aur.cursed.publish
 
 import io.ktor.client.*
 import io.ktor.client.engine.*
-import io.ktor.client.engine.apache5.*
+import io.ktor.client.engine.cio.*
 import org.gradle.api.*
 import org.gradle.api.provider.*
 import org.gradle.api.tasks.*
@@ -110,7 +110,7 @@ interface CursedPublishSpec {
 
         object Default : HttpClientInitializer {
             override fun create(config: Action<in HttpClientConfig<*>>): HttpClient {
-                return HttpClient(Apache5) {
+                return HttpClient(CIO) {
                     config.execute(this)
                 }
             }

@@ -6,12 +6,11 @@ import kotlinx.serialization.json.*
 import rocks.aur.cursed.publish.*
 import rocks.aur.cursed.publish.internal.*
 import rocks.aur.cursed.publish.internal.model.*
-import java.io.*
 
 @OptIn(CursedInternalApi::class)
 object GameVersionsSpec : FunSpec({
     test("serialization") {
-        val types = JsonArray(GameVersionsSpec.stream().use { stream ->
+        val types = JsonArray(ModelFixtures.gameVersions().use { stream ->
             CursedJson.decodeFromString<JsonArray>(stream.bufferedReader().readText())
         }.map {
             when (it) {
@@ -25,7 +24,4 @@ object GameVersionsSpec : FunSpec({
 
         serialized shouldBe types
     }
-}) {
-    fun stream(): InputStream = GameVersionTypesSpec::class.java.getResourceAsStream("versions.json")
-        ?: throw AssertionError("no versions.json was found")
-}
+})
