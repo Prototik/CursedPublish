@@ -67,6 +67,12 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: wrapper
+      - name: Cache build files
+        uses: actions/cache@v3
+        with:
+          path: '**/build/'
+          key: pipeline-${{ github.run_id }}-gradle-build-cache
+          fail-on-cache-miss: true
       - name: Build
         run: gradle -s :build
       - name: Archive Jar
@@ -74,11 +80,13 @@ jobs:
         with:
           name: jar
           path: '**/build/libs/'
-      - name: Cache build files
-        uses: actions/cache@v3
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure()
         with:
-          path: '**/build/'
-          key: pipeline-${{ github.run_id }}-gradle-build-cache
+          report_paths: '**/build/test-results/*/TEST-*.xml'
+          check_name: "JUnit Test Report (Unit tests)"
+          fail_on_failure: true
   test:
     name: Integration tests
     runs-on: ubuntu-latest
@@ -126,12 +134,15 @@ jobs:
         if: success() || failure()
         with:
           report_paths: '**/build/test-results/*/TEST-*.xml'
-          check_name: "JUnit Test Report (Gradle ${{ matrix.gradle }}, Java ${{ matrix.java }})"
+          check_name: "JUnit Test Report (Integration tests, Gradle ${{ matrix.gradle }}, Java ${{ matrix.java }})"
+          fail_on_failure: true
   release:
     name: Publish & Release
     needs: [ init, build, test ]
     if: needs.init.outputs.newRelease == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       NYX_RESUME: true
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
