@@ -241,7 +241,6 @@ tasks {
         dependsOn(assemble)
     }
     nyxPublish {
-        dependsOn("publishAllPublicationsToKkIncRepository")
-//        dependsOn("publishPlugins")
+        dependsOn("publishAllPublicationsToKkIncRepository", "publishPlugins")
     }
 }
