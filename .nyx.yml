@@ -1,0 +1,42 @@
+preset: simple
+changelog:
+  path: build/CHANGELOG.md
+  template: "config/CHANGELOG.tpl"
+  sections:
+    "Added": "^feat$"
+    "Fixed": "^fix$"
+  substitutions:
+    "(?m)#([0-9]+)(?s)": "[#%s](https://github.com/{{#environmentVariable}}GITHUB_REPOSITORY_OWNER{{/environmentVariable}}/CursedPublish/issues/%s)"
+releaseTypes:
+  enabled:
+    - mainline
+    - internal
+  publicationServices:
+    - github
+  items:
+    mainline:
+      description: "{{#fileContent}}build/CHANGELOG.md{{/fileContent}}"
+      filterTags: "^({{configuration.releasePrefix}})?([0-9]\\d*)\\.([0-9]\\d*)\\.([0-9]\\d*)$"
+      gitPush: "true"
+      gitTag: "true"
+      matchBranches: "^(master|main)$"
+      matchEnvironmentVariables:
+        CI: "^true$"
+      matchWorkspaceStatus: "CLEAN"
+      publish: "true"
+    internal:
+      description: "{{#fileContent}}build/CHANGELOG.md{{/fileContent}}"
+      collapseVersions: true
+      collapsedVersionQualifier: "internal"
+      gitPush: "false"
+      gitTag: "false"
+      publish: "false"
+      publishPreRelease: "true"
+services:
+  github:
+    type: GITHUB
+    options:
+      AUTHENTICATION_TOKEN: "{{#environmentVariable}}GITHUB_TOKEN{{/environmentVariable}}"
+      REPOSITORY_NAME: "{{#environmentVariable}}GITHUB_REPOSITORY_OWNER{{/environmentVariable}}"
+      REPOSITORY_OWNER: "CursedPublish"
+stateFile: "build/.nyx-state.json"
