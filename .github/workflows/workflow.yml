@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
       - name: Load Nyx data
         id: nyx
-        uses: mooltiverse/nyx-github-action@v1
+        uses: mooltiverse/nyx-github-action@main
         with:
           command: infer
           resume: false
