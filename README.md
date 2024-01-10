@@ -7,14 +7,14 @@ Plugin to automatically publish artifacts (mods) on the CurseForge portal direct
 
 ## Setup
 
-[![Latest version](https://img.shields.io/gradle-plugin-portal/v/rocks.aur.cursed.publish?logo=gradle&label=Latest%20version&color=%2302303A)](https://plugins.gradle.org/plugin/rocks.aur.cursed.publish)
+[![Latest version](https://img.shields.io/gradle-plugin-portal/v/rocks.aur.cursedpublish?logo=gradle&label=Latest%20version&color=%2302303A)](https://plugins.gradle.org/plugin/rocks.aur.cursedpublish)
 
 <details open>
 <summary>Kotlin buildscript</summary>
 
 ```kotlin
 plugins {
-    id("rocks.aur.cursed.publish") version "<version>"
+    id("rocks.aur.cursedpublish") version "<version>"
 }
 ```
 </details>
@@ -24,7 +24,7 @@ plugins {
 
 ```groovy
 plugins {
-    id 'rocks.aur.cursed.publish' version '<version>'
+    id 'rocks.aur.cursedpublish' version '<version>'
 }
 ```
 </details>
