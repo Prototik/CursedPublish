@@ -28,7 +28,7 @@ releaseTypes:
     integration:
       collapseVersions: true
       collapsedVersionQualifier: "{{#sanitizeLower}}{{branch}}{{/sanitizeLower}}"
-      description: "{{#file.content}}build/CHANGELOG.md{{/file.content}}"
+      description: "{{#fileContent}}build/CHANGELOG.md{{/fileContent}}"
       filterTags: "^({{configuration.releasePrefix}})?([0-9]\\d*)\\.([0-9]\\d*)\\.([0-9]\\d*)(-(develop|development|integration|latest)(\\.([0-9]\\d*))?)$"
       gitCommit: "false"
       gitPush: "true"
