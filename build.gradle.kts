@@ -1,7 +1,9 @@
 @file:Suppress("UnstableApiUsage")
 
 import org.jetbrains.kotlin.gradle.dsl.*
+import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+import com.mooltiverse.oss.nyx.state.State as NyxState
 
 plugins {
     `jvm-test-suite`
@@ -11,6 +13,8 @@ plugins {
     embeddedKotlin("jvm")
     embeddedKotlin("plugin.serialization")
 }
+
+val nyxState: NyxState by extraProperties
 
 allprojects {
     pluginManager.withPlugin("org.gradle.java-base") {
@@ -70,7 +74,7 @@ allprojects {
                     }
                 }
 
-                tasks.register("publishAllPublicationsToKkIncRepository") {
+                val publishAllPublicationsToKkIncRepository by tasks.registering {
                     dependsOn(
                         if (project.version.toString().endsWith("-SNAPSHOT")) {
                             "publishAllPublicationsToKkIncSnapshotsRepository"
@@ -78,6 +82,10 @@ allprojects {
                             "publishAllPublicationsToKkIncReleasesRepository"
                         }
                     )
+                }
+
+                tasks.nyxPublish {
+                    dependsOn(publishAllPublicationsToKkIncRepository)
                 }
             }
         }
@@ -225,7 +233,7 @@ gradlePlugin {
 }
 
 signing {
-    isRequired = System.getenv("RELEASE") == "true"
+    isRequired = nyxState.coreVersion
     val signingKeyId: String? by project
     val signingKey: String? by project
     val signingPassword: String? by project
@@ -234,13 +242,10 @@ signing {
 }
 
 tasks {
-    clean {
-        dependsOn(nyxClean)
-    }
-    nyxMake {
-        dependsOn(assemble)
+    publishPlugins {
+        onlyIf { nyxState.coreVersion }
     }
     nyxPublish {
-        dependsOn("publishAllPublicationsToKkIncRepository", "publishPlugins")
+        dependsOn(publishPlugins)
     }
 }

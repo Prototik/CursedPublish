@@ -145,7 +145,6 @@ jobs:
       contents: write
     env:
       NYX_RESUME: true
-      RELEASE: true
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       MAVEN_USER: ${{ secrets.MAVEN_USER }}
       MAVEN_PASS: ${{ secrets.MAVEN_PASS }}
