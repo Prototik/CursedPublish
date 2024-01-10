@@ -9,6 +9,7 @@ import org.gradle.internal.*
 import org.jetbrains.annotations.*
 import java.io.*
 
+@Suppress("unused")
 @ApiStatus.NonExtendable
 @CursedDsl
 @SubclassOptInRequired(markerClass = CursedInternalApi::class)
@@ -34,6 +35,10 @@ interface CursedFile : Named, Buildable {
         changelogType(changelogType)
         changelog(changelog)
     }
+
+    fun changelogText(changelog: String) = changelog(CursedChangelogType.Text, changelog)
+    fun changelogHtml(changelog: String) = changelog(CursedChangelogType.Html, changelog)
+    fun changelogMarkdown(changelog: String) = changelog(CursedChangelogType.Markdown, changelog)
 
     @get:Input
     @get:Optional

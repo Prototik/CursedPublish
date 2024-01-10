@@ -243,7 +243,7 @@ signing {
 
 tasks {
     publishPlugins {
-        onlyIf { nyxState.coreVersion }
+        onlyIf { nyxState.coreVersion && nyxState.newRelease }
     }
     nyxPublish {
         dependsOn(publishPlugins)

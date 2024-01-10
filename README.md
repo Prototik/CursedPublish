@@ -42,7 +42,7 @@ cursedPublish {
         displayName("MyCoolMod (Fabric)")
         
         // Changelog
-        changelog(CursedChangelogType.Text, "Some changelog")
+        changelogMarkdown("# Some changelog for my CoolMod")
 
         // Minecraft version
         minecraft("1.20.4")

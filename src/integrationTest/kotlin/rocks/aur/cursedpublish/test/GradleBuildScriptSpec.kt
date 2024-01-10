@@ -124,7 +124,7 @@ object KotlinGradleBuildScriptSpec : GradleBuildScriptSpec({ projectDir, apiBase
             
             file(tasks.jar) {
                 displayName("MyCoolMod (Fabric)")
-                changelog(CursedChangelogType.Text, "Some changelog")
+                changelogText("Some changelog")
             
                 minecraft("1.20.4")
                 fabric()
@@ -173,7 +173,7 @@ object GroovyGradleBuildScriptSpec : GradleBuildScriptSpec({ projectDir, apiBase
             
             file(tasks.jar) {
                 displayName 'MyCoolMod (Fabric)'
-                changelog CursedChangelogType.Text, 'Some changelog'
+                changelogText 'Some changelog'
             
                 minecraft '1.20.4'
                 fabric()
