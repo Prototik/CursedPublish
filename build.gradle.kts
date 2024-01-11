@@ -143,6 +143,7 @@ dependencies {
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.encoding)
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.semver)
 
     compileOnlyApi(libs.annotations)
 }

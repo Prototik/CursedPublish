@@ -1,4 +1,4 @@
-package rocks.aur.cursedpublish.internal
+package rocks.aur.cursedpublish.internal.infer
 
 import org.jetbrains.annotations.*
 import rocks.aur.cursedpublish.*
@@ -6,20 +6,16 @@ import rocks.aur.cursedpublish.internal.model.*
 
 @ApiStatus.Internal
 @CursedInternalApi
-internal fun interface GameVersionResolver {
-    fun resolve(
-        versions: Collection<GameVersion>,
-        versionTypes: Collection<GameVersionType>
-    ): Collection<GameVersion>
+internal fun interface GameVersionInfer {
+    fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion>
 
     @ApiStatus.Internal
-    abstract class ByType : GameVersionResolver {
+    abstract class ByType : GameVersionInfer {
+        override fun Infer.Scope.inferGameVersions(file: CursedFile) = inferGameVersions()
+
         @OptIn(ExperimentalUnsignedTypes::class)
-        override fun resolve(
-            versions: Collection<GameVersion>,
-            versionTypes: Collection<GameVersionType>
-        ): Collection<GameVersion> {
-            val types = versionTypes.filter(this::isGameVersionTypeApplicable).map { it.id }.toUIntArray()
+        internal fun Infer.Scope.inferGameVersions(): Collection<GameVersion> {
+            val types = versionTypes.filter(::isGameVersionTypeApplicable).map { it.id }.toUIntArray()
             return versions.filter { it.typeId in types }
         }
 
@@ -38,5 +34,12 @@ internal fun interface GameVersionResolver {
         override fun isGameVersionTypeApplicable(gameVersionType: GameVersionType): Boolean {
             return gameVersionType.slug.startsWith(slugPrefix)
         }
+    }
+
+    companion object {
+        internal val MINECRAFT_RESOLVER = ByTypeSlugPrefix("minecraft-")
+        internal val MODLOADER_RESOLVER = ByTypeSlug("modloader")
+        internal val JAVA_RESOLVER = ByTypeSlug("java")
+        internal val ENVIRONMENT_RESOLVER = ByTypeSlug("environment")
     }
 }

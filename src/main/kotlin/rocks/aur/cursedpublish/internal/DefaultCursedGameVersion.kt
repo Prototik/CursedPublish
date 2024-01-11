@@ -7,33 +7,29 @@ import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.annotations.*
 import rocks.aur.cursedpublish.*
+import rocks.aur.cursedpublish.internal.infer.*
 import rocks.aur.cursedpublish.internal.model.*
 import javax.inject.*
 
 @ApiStatus.Internal
 @CursedInternalApi
-internal sealed class DefaultCursedGameVersion : CursedGameVersion {
-    abstract fun resolve(
-        versions: Collection<GameVersion>,
-        versionTypes: Collection<GameVersionType>
-    ): Sequence<GameVersion>
-
-    internal suspend inline fun SequenceScope<GameVersion>.resolveName(
+internal sealed class DefaultCursedGameVersion : CursedGameVersion, GameVersionInfer {
+    internal fun MutableCollection<GameVersion>.resolveName(
         property: Provider<out String>,
         versionsToLookup: () -> Collection<GameVersion>,
     ) {
         val name = property.orNull ?: return
         val versions = versionsToLookup.invoke()
-        yield(versions.single { it.name == name })
+        this += versions.single { it.name == name }
     }
 
-    internal suspend inline fun SequenceScope<GameVersion>.resolveSlug(
+    internal fun MutableCollection<GameVersion>.resolveSlug(
         property: Provider<out String>,
         versionsToLookup: () -> Collection<GameVersion>,
     ) {
         val slug = property.orNull ?: return
         val versions = versionsToLookup.invoke()
-        yield(versions.single { it.slug == slug })
+        this += versions.single { it.slug == slug }
     }
 
     @ApiStatus.Internal
@@ -42,16 +38,12 @@ internal sealed class DefaultCursedGameVersion : CursedGameVersion {
     ) : DefaultCursedGameVersion(), CursedGameVersion.Minecraft {
         @get:Input
         override val version: Property<String> = objects.property()
-        override fun resolve(
-            versions: Collection<GameVersion>,
-            versionTypes: Collection<GameVersionType>
-        ): Sequence<GameVersion> = sequence {
-            resolveName(version) { MINECRAFT_RESOLVER.resolve(versions, versionTypes) }
+
+        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> = buildList {
+            resolveName(version) { minecraftVersions }
         }
 
-        companion object {
-            private val MINECRAFT_RESOLVER = GameVersionResolver.ByTypeSlugPrefix("minecraft-")
-        }
+        override fun toString() = "CursedGameVersion.Minecraft(version=${version.orNull})"
     }
 
     @ApiStatus.Internal
@@ -61,16 +53,11 @@ internal sealed class DefaultCursedGameVersion : CursedGameVersion {
         @get:Input
         override val type: Property<CursedGameVersion.ModLoader.Type> = objects.property()
 
-        override fun resolve(
-            versions: Collection<GameVersion>,
-            versionTypes: Collection<GameVersionType>
-        ): Sequence<GameVersion> = sequence {
-            resolveSlug(type.map { it.slug }) { MODLOADER_RESOLVER.resolve(versions, versionTypes) }
+        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> = buildList {
+            resolveSlug(type.map { it.slug }) { modloaders }
         }
 
-        companion object {
-            private val MODLOADER_RESOLVER = GameVersionResolver.ByTypeSlug("modloader")
-        }
+        override fun toString() = "CursedGameVersion.ModLoader(type=${type.orNull})"
     }
 
     @ApiStatus.Internal
@@ -79,16 +66,11 @@ internal sealed class DefaultCursedGameVersion : CursedGameVersion {
     ) : DefaultCursedGameVersion(), CursedGameVersion.Java {
         @get:Input
         override val version: Property<Int> = objects.property()
-        override fun resolve(
-            versions: Collection<GameVersion>,
-            versionTypes: Collection<GameVersionType>
-        ): Sequence<GameVersion> = sequence {
-            resolveSlug(version.map { "java-$it" }) { JAVA_RESOLVER.resolve(versions, versionTypes) }
+        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> = buildList {
+            resolveSlug(version.map { "java-$it" }) { javaVersions }
         }
 
-        companion object {
-            private val JAVA_RESOLVER = GameVersionResolver.ByTypeSlug("java")
-        }
+        override fun toString() = "CursedGameVersion.Java(version=${version.orNull})"
     }
 
     @ApiStatus.Internal
@@ -97,16 +79,10 @@ internal sealed class DefaultCursedGameVersion : CursedGameVersion {
     ) : DefaultCursedGameVersion(), CursedGameVersion.Environment {
         @get:Input
         override val type: Property<CursedGameVersion.Environment.Type> = objects.property()
-        override fun resolve(
-            versions: Collection<GameVersion>,
-            versionTypes: Collection<GameVersionType>
-        ): Sequence<GameVersion> = sequence {
-            resolveSlug(type.map { it.slug }) { ENVIRONMENT_RESOLVER.resolve(versions, versionTypes) }
+        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> = buildList {
+            resolveSlug(type.map { it.slug }) { environment }
         }
 
-        companion object {
-            private val ENVIRONMENT_RESOLVER = GameVersionResolver.ByTypeSlug("environment")
-        }
+        override fun toString() = "CursedGameVersion.Environment(type=${type.orNull})"
     }
-
 }

@@ -10,3 +10,9 @@ import rocks.aur.cursedpublish.*
 internal val CursedJson = Json(DefaultJson) {
     ignoreUnknownKeys = true
 }
+
+@CursedInternalApi
+@ApiStatus.Internal
+internal val CursedJsonPretty = Json(CursedJson) {
+    prettyPrint = true
+}

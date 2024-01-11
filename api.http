@@ -10,3 +10,15 @@ Accept: application/json
 Accept-Charset: utf-8
 X-Api-Token: {{token}}
 
+### Search game
+GET https://api.curseforge.com/v1/games
+Accept: application/json
+Accept-Charset: utf-8
+X-Api-Key: {{studios_token}}
+
+### Search mod
+GET https://api.curseforge.com/v1/mods/search?gameId=0
+Accept: application/json
+Accept-Charset: utf-8
+X-Api-Token: {{studios_token}}
+

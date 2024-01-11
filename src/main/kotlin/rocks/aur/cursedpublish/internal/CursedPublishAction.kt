@@ -11,14 +11,18 @@ import io.ktor.util.cio.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.*
 import org.gradle.api.artifacts.*
+import org.gradle.api.logging.*
 import org.jetbrains.annotations.*
 import rocks.aur.cursedpublish.*
+import rocks.aur.cursedpublish.internal.infer.*
 import rocks.aur.cursedpublish.internal.model.*
 
 @ApiStatus.Internal
 @CursedInternalApi
 internal data class CursedPublishAction(
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val logger: Logger,
+    private val infer: Infer = Infer.Empty
 ) {
     fun publish(file: CursedFile.Version): CursedPublishWorkResult {
         val result = httpClient.async { doPublish(file) }
@@ -34,7 +38,18 @@ internal data class CursedPublishAction(
     private suspend fun doPublish(file: CursedFile.Version) = coroutineScope {
         val gameVersionTypes = async { get<List<GameVersionType>>("api/game/version-types") }
         val gameVersions = async { get<List<GameVersion>>("api/game/versions") }
-        doPublish(gameVersionTypes.await(), gameVersions.await(), file)
+        val scope = PublishScope(gameVersionTypes.await(), gameVersions.await())
+        doPublish(scope, file)
+    }
+
+    private data class PublishScope(
+        override val versionTypes: Collection<GameVersionType>,
+        override val versions: Collection<GameVersion>,
+    ) : Infer.Scope {
+        override val minecraftVersions: Collection<GameVersion> by lazy { super.minecraftVersions }
+        override val environment: Collection<GameVersion> by lazy { super.environment }
+        override val javaVersions: Collection<GameVersion> by lazy { super.javaVersions }
+        override val modloaders: Collection<GameVersion> by lazy { super.modloaders }
     }
 
     private suspend inline fun <reified T : Any> get(url: String): T {
@@ -47,16 +62,20 @@ internal data class CursedPublishAction(
     }
 
     private suspend fun doPublish(
-        gameVersionTypes: List<GameVersionType>,
-        gameVersions: List<GameVersion>,
+        scope: PublishScope,
         file: CursedFile.Version
     ): DefaultCursedPublishWorkResult {
+        val definedGameVersions = scope.resolveGameVersions(file.gameVersions.get(), file)
+        val inferredGameVersions = with(infer) { scope.inferGameVersions(file) }
+
+        val allGameVersions = definedGameVersions + inferredGameVersions
+
         val metadata = UploadMetadata(
             changelog = file.changelog.get(),
             changelogType = file.changelogType.get(),
             displayName = file.displayName.orNull,
             parentFileID = null,
-            gameVersions = resolve(gameVersionTypes, gameVersions, file.gameVersions.get()),
+            gameVersions = allGameVersions.mapTo(mutableSetOf(), GameVersion::id),
             releaseType = file.releaseType.get(),
             relations = resolve(file.relations),
         )
@@ -90,6 +109,13 @@ internal data class CursedPublishAction(
         metadata: UploadMetadata
     ): DefaultCursedPublishWorkResult {
         val fileToUpload = file.file.get().asFile
+        if (logger.isDebugEnabled) {
+            logger.debug(
+                "Uploading file {} with the following metadata:\n{}",
+                fileToUpload,
+                CursedJsonPretty.encodeToString(metadata)
+            )
+        }
         val statement = httpClient.prepareFormWithBinaryData(
             "api/projects/${file.projectId.get()}/upload-file", listOf(
                 PartData.FormItem(CursedJson.encodeToString(metadata), {}, buildHeaders {
@@ -117,22 +143,32 @@ internal data class CursedPublishAction(
             )
         )
         val response = statement.execute()
+        logger.trace("Response status: {}", response.status)
         return if (response.status.isSuccess()) {
             val result = response.body<UploadFileResult>()
+            logger.info("File {} uploaded with id {}", fileToUpload, result.id)
             DefaultCursedPublishWorkResult(result.id, file)
         } else {
             val error = response.body<CurseforgeError>()
+            logger.error("File {} had failed to upload with error {}", fileToUpload, error)
             DefaultCursedPublishWorkResult(PublishException("Failed to publish: ${error.code} - ${error.message}"))
         }
     }
 
-    private fun resolve(
-        gameVersionTypes: List<GameVersionType>,
-        gameVersions: List<GameVersion>,
-        candidates: Set<CursedGameVersion>
-    ): Set<UInt> = candidates.asSequence().map { it as DefaultCursedGameVersion }.flatMap {
-        it.resolve(gameVersions, gameVersionTypes)
-    }.map { it.id }.toSet()
+    private fun Infer.Scope.resolveGameVersions(
+        candidates: Iterable<CursedGameVersion>,
+        file: CursedFile
+    ): Sequence<GameVersion> = candidates.asSequence().map {
+        it as GameVersionInfer
+    }.flatMap { cursedGameVersion ->
+        with(cursedGameVersion) {
+            inferGameVersions(file)
+        }.also { result ->
+            if (logger.isDebugEnabled) {
+                logger.debug("{} resolves to {}", cursedGameVersion, result)
+            }
+        }
+    }
 
     private fun resolve(relations: CursedRelations) = UploadMetadata.Relations(
         projects = relations.projects.map { project ->

@@ -8,7 +8,9 @@ import org.gradle.api.provider.*
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.workers.internal.*
+import org.jetbrains.annotations.*
 import rocks.aur.cursedpublish.internal.*
+import rocks.aur.cursedpublish.internal.infer.*
 import javax.inject.*
 
 @OptIn(CursedInternalApi::class)
@@ -25,6 +27,11 @@ open class CursedPublishTask @Inject constructor(
         file.finalizeValue()
         action.execute(file.get())
     }
+
+    @CursedInternalApi
+    @ApiStatus.Internal
+    @get:Internal
+    internal val infer: Property<Infer> = objects.property<Infer>().convention(Infer.Empty)
 
     private val httpClient: () -> HttpClient
 
@@ -46,6 +53,6 @@ open class CursedPublishTask @Inject constructor(
     }
 
     private fun doUpload(file: CursedFile.Version): CursedPublishWorkResult {
-        return CursedPublishAction(httpClient()).publish(file)
+        return CursedPublishAction(httpClient(), logger, infer.get()).publish(file)
     }
 }

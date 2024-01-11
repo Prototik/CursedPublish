@@ -15,24 +15,43 @@ import java.net.*
 @CursedDsl
 @SubclassOptInRequired(markerClass = CursedInternalApi::class)
 interface CursedPublishSpec {
+    /**
+     * CurseForge Upload API base url, defaults to [API_BASE_URL]
+     */
     @get:Input
     val apiBaseUrl: Property<URI>
 
+    /**
+     * CurseForge Upload API base url, defaults to [API_BASE_URL]
+     */
     fun apiBaseUrl(apiBaseUrl: URI) {
         this.apiBaseUrl.set(apiBaseUrl)
     }
 
+
+    /**
+     * CurseForge Upload API base url, defaults to [API_BASE_URL]
+     */
     fun apiBaseUrl(apiBaseUrl: URL) {
         apiBaseUrl(apiBaseUrl.toURI())
     }
 
+    /**
+     * CurseForge Upload API base url, defaults to [API_BASE_URL]
+     */
     fun apiBaseUrl(apiBaseUrl: String) {
         apiBaseUrl(URI.create(apiBaseUrl))
     }
 
+    /**
+     * CurseForge Upload API token, obtainable at the [settings page](https://legacy.curseforge.com/account/api-tokens)
+     */
     @get:Input
     val apiToken: Property<String>
 
+    /**
+     * CurseForge Upload API token, obtainable at the [settings page](https://legacy.curseforge.com/account/api-tokens)
+     */
     fun apiToken(apiToken: String) {
         this.apiToken.set(apiToken)
     }
