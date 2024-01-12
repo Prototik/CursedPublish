@@ -6,7 +6,7 @@ import rocks.aur.cursedpublish.internal.model.*
 import rocks.aur.cursedpublish.testlib.models.*
 
 @OptIn(CursedInternalApi::class)
-object TestInferScope : Infer.Scope {
+internal object TestInferScope : Infer.Scope() {
     override val versionTypes: Collection<GameVersionType> by lazy {
         ModelFixtures.gameVersionTypes().reader().use { reader ->
             CursedJson.decodeFromString(reader.readText())
@@ -18,9 +18,4 @@ object TestInferScope : Infer.Scope {
             CursedJson.decodeFromString(reader.readText())
         }
     }
-
-    override val minecraftVersions: Collection<GameVersion> by lazy { super.minecraftVersions }
-    override val environment: Collection<GameVersion> by lazy { super.environment }
-    override val javaVersions: Collection<GameVersion> by lazy { super.javaVersions }
-    override val modloaders: Collection<GameVersion> by lazy { super.modloaders }
 }

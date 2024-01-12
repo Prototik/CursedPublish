@@ -12,9 +12,16 @@ import rocks.aur.cursedpublish.*
 import rocks.aur.cursedpublish.internal.*
 import java.io.*
 import java.util.jar.*
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 
 object FabricModInferSpec : FunSpec({
-    val modFile: File = tempfile()
+    lateinit var modFile: File
+
+    beforeTest {
+        modFile = tempfile()
+    }
 
     fun infer() = with(FabricModInfer) {
         TestInferScope.inferGameVersions(modFile)
@@ -124,3 +131,6 @@ private fun genDummyFabricMod(
     }
 }
 
+fun main() {
+    println(TestInferScope.javaVersions.mapKeys { (g, _) -> g.name })
+}

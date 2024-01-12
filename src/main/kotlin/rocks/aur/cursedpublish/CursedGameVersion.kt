@@ -13,6 +13,9 @@ interface CursedGameVersion {
     interface Minecraft : CursedGameVersion {
         @get:Input
         val version: Property<String>
+
+        @get:Input
+        val onlyStable: Property<Boolean>
     }
 
     @ApiStatus.NonExtendable

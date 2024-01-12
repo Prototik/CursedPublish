@@ -1,5 +1,6 @@
 package rocks.aur.cursedpublish.internal.infer
 
+import io.github.z4kn4fein.semver.*
 import org.jetbrains.annotations.*
 import rocks.aur.cursedpublish.*
 import rocks.aur.cursedpublish.internal.model.*
@@ -11,14 +12,35 @@ internal interface Infer : GameVersionInfer {
 
     @ApiStatus.Internal
     @CursedInternalApi
-    interface Scope {
-        val versions: Collection<GameVersion>
-        val versionTypes: Collection<GameVersionType>
+    abstract class Scope {
+        abstract val versions: Collection<GameVersion>
+        abstract val versionTypes: Collection<GameVersionType>
 
-        val minecraftVersions: Collection<GameVersion> get() = with(GameVersionInfer.MINECRAFT_RESOLVER) { inferGameVersions() }
-        val javaVersions: Collection<GameVersion> get() = with(GameVersionInfer.JAVA_RESOLVER) { inferGameVersions() }
-        val modloaders: Collection<GameVersion> get() = with(GameVersionInfer.MODLOADER_RESOLVER) { inferGameVersions() }
-        val environment: Collection<GameVersion> get() = with(GameVersionInfer.ENVIRONMENT_RESOLVER) { inferGameVersions() }
+        val minecraftVersions by lazy {
+            with(GameVersionInfer.MINECRAFT_RESOLVER) { inferGameVersions() }.associateWith { gameVersion ->
+                try {
+                    if (gameVersion.name.startsWith("Beta ")) {
+                        val ver = Version.parse(gameVersion.name.removePrefix("Beta "), strict = false)
+                        ver.copy(major = ver.major - 1)
+                    } else {
+                        Version.parse(gameVersion.name, strict = false)
+                    }
+                } catch (e: VersionFormatException) {
+                    null
+                }
+            }
+        }
+        val javaVersions by lazy {
+            with(GameVersionInfer.JAVA_RESOLVER) { inferGameVersions() }.associateWith { gameVersion ->
+                try {
+                    Version.parse(gameVersion.name.removePrefix("Java "), strict = false)
+                } catch (e: VersionFormatException) {
+                    null
+                }
+            }
+        }
+        val modloaders by lazy { with(GameVersionInfer.MODLOADER_RESOLVER) { inferGameVersions() } }
+        val environment by lazy { with(GameVersionInfer.ENVIRONMENT_RESOLVER) { inferGameVersions() } }
     }
 
     object Empty : Infer

@@ -66,30 +66,15 @@ internal object FabricModInfer : Infer, Named {
         }
     }
 
-    private val Infer.Scope.applicableMinecraftVersions: Collection<GameVersion>
-        get() = minecraftVersions.filter {
-            // TODO: handle snapshots versions too?...
-            !it.slug.endsWith("-snapshot", ignoreCase = true) && !it.name.contains("snapshot", ignoreCase = true)
-        }.filter {
-            // TODO: handle beta versions too?...
-            !it.slug.startsWith("beta-")
-        }
-
     private fun Infer.Scope.inferFromModInfo(
         modInfo: FabricModInfo
     ): Collection<GameVersion> = buildSet {
         this += modloaders.single { it.slug == "fabric" }
 
         modInfo.depends["minecraft"]?.let { minecraftRange ->
-            applicableMinecraftVersions.filterTo(this) {
-                val version = try {
-                    Version.parse(it.name, strict = false)
-                } catch (e: VersionFormatException) {
-                    logger.warn("Unable to parse {} as minecraft version, skipping", it.name)
-                    return@filterTo false
-                }
-                minecraftRange.constraint.isSatisfiedBy(version)
-            }
+            this += minecraftVersions.filterValues {
+                it != null && it.isStable && minecraftRange.constraint.isSatisfiedBy(it)
+            }.keys
         }
 
         if (Environment.Client in modInfo.environment) {
@@ -103,15 +88,9 @@ internal object FabricModInfer : Infer, Named {
     private fun Infer.Scope.inferFromManifest(manifest: Manifest): Collection<GameVersion> = buildSet {
         manifest.mainAttributes.getValue("Fabric-Minecraft-Version")?.let { minecraftVersion ->
             val constraint = Constraint.parse("=$minecraftVersion")
-            applicableMinecraftVersions.filterTo(this) {
-                val version = try {
-                    Version.parse(it.name, strict = false)
-                } catch (e: VersionFormatException) {
-                    logger.warn("Unable to parse {} as minecraft version, skipping", it.name)
-                    return@filterTo false
-                }
-                constraint.isSatisfiedBy(version)
-            }
+            this += minecraftVersions.filterValues {
+                it != null && constraint.isSatisfiedBy(it)
+            }.keys
         }
         manifest.mainAttributes.getValue("Fabric-Loader-Version")?.let {
             this += modloaders.single { it.slug == "fabric" }

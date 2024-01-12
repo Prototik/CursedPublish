@@ -1,5 +1,7 @@
 package rocks.aur.cursedpublish.internal
 
+import io.github.z4kn4fein.semver.*
+import io.github.z4kn4fein.semver.constraints.*
 import org.gradle.api.model.*
 import org.gradle.api.provider.*
 import org.gradle.api.provider.Provider
@@ -14,22 +16,22 @@ import javax.inject.*
 @ApiStatus.Internal
 @CursedInternalApi
 internal sealed class DefaultCursedGameVersion : CursedGameVersion, GameVersionInfer {
-    internal fun MutableCollection<GameVersion>.resolveName(
+
+    internal fun resolveSlug(
         property: Provider<out String>,
-        versionsToLookup: () -> Collection<GameVersion>,
-    ) {
-        val name = property.orNull ?: return
-        val versions = versionsToLookup.invoke()
-        this += versions.single { it.name == name }
+        versions: Collection<GameVersion>,
+    ): Collection<GameVersion> {
+        val slug = property.orNull ?: return emptySet()
+        return setOf(versions.single { it.slug == slug })
     }
 
-    internal fun MutableCollection<GameVersion>.resolveSlug(
-        property: Provider<out String>,
-        versionsToLookup: () -> Collection<GameVersion>,
-    ) {
-        val slug = property.orNull ?: return
-        val versions = versionsToLookup.invoke()
-        this += versions.single { it.slug == slug }
+    internal fun resolveVersion(
+        property: Provider<out Constraint>,
+        versions: Map<GameVersion, Version?>,
+        onlyStable: Boolean = true,
+    ): Collection<GameVersion> {
+        val constraint = property.orNull ?: return emptySet()
+        return versions.filterValues { it != null && (!onlyStable || it.isStable) && constraint.isSatisfiedBy(it) }.keys
     }
 
     @ApiStatus.Internal
@@ -39,9 +41,11 @@ internal sealed class DefaultCursedGameVersion : CursedGameVersion, GameVersionI
         @get:Input
         override val version: Property<String> = objects.property()
 
-        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> = buildList {
-            resolveName(version) { minecraftVersions }
-        }
+        @get:Input
+        override val onlyStable: Property<Boolean> = objects.property<Boolean>().convention(true)
+
+        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> =
+            resolveVersion(version.map(Constraint::parse), minecraftVersions, onlyStable.get())
 
         override fun toString() = "CursedGameVersion.Minecraft(version=${version.orNull})"
     }
@@ -53,9 +57,8 @@ internal sealed class DefaultCursedGameVersion : CursedGameVersion, GameVersionI
         @get:Input
         override val type: Property<CursedGameVersion.ModLoader.Type> = objects.property()
 
-        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> = buildList {
-            resolveSlug(type.map { it.slug }) { modloaders }
-        }
+        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> =
+            resolveSlug(type.map { it.slug }, modloaders)
 
         override fun toString() = "CursedGameVersion.ModLoader(type=${type.orNull})"
     }
@@ -66,9 +69,8 @@ internal sealed class DefaultCursedGameVersion : CursedGameVersion, GameVersionI
     ) : DefaultCursedGameVersion(), CursedGameVersion.Java {
         @get:Input
         override val version: Property<Int> = objects.property()
-        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> = buildList {
-            resolveSlug(version.map { "java-$it" }) { javaVersions }
-        }
+        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> =
+            resolveVersion(version.map { Constraint.parse("$it") }, javaVersions)
 
         override fun toString() = "CursedGameVersion.Java(version=${version.orNull})"
     }
@@ -79,9 +81,8 @@ internal sealed class DefaultCursedGameVersion : CursedGameVersion, GameVersionI
     ) : DefaultCursedGameVersion(), CursedGameVersion.Environment {
         @get:Input
         override val type: Property<CursedGameVersion.Environment.Type> = objects.property()
-        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> = buildList {
-            resolveSlug(type.map { it.slug }) { environment }
-        }
+        override fun Infer.Scope.inferGameVersions(file: CursedFile): Collection<GameVersion> =
+            resolveSlug(type.map { it.slug }, environment)
 
         override fun toString() = "CursedGameVersion.Environment(type=${type.orNull})"
     }

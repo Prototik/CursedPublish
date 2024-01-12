@@ -45,12 +45,7 @@ internal data class CursedPublishAction(
     private data class PublishScope(
         override val versionTypes: Collection<GameVersionType>,
         override val versions: Collection<GameVersion>,
-    ) : Infer.Scope {
-        override val minecraftVersions: Collection<GameVersion> by lazy { super.minecraftVersions }
-        override val environment: Collection<GameVersion> by lazy { super.environment }
-        override val javaVersions: Collection<GameVersion> by lazy { super.javaVersions }
-        override val modloaders: Collection<GameVersion> by lazy { super.modloaders }
-    }
+    ) : Infer.Scope()
 
     private suspend inline fun <reified T : Any> get(url: String): T {
         val response = httpClient.get(url)
