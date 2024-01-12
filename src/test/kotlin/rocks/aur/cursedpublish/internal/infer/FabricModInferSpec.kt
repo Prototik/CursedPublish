@@ -8,8 +8,10 @@ import io.kotest.datatest.*
 import io.kotest.engine.spec.*
 import io.kotest.matchers.collections.*
 import kotlinx.serialization.*
+import org.gradle.kotlin.dsl.*
 import rocks.aur.cursedpublish.*
 import rocks.aur.cursedpublish.internal.*
+import rocks.aur.cursedpublish.testlib.*
 import java.io.*
 import java.util.jar.*
 import kotlin.collections.component1
@@ -17,11 +19,7 @@ import kotlin.collections.component2
 import kotlin.collections.set
 
 object FabricModInferSpec : FunSpec({
-    lateinit var modFile: File
-
-    beforeTest {
-        modFile = tempfile()
-    }
+    val modFile: File by ThreadLocal.withInitial { tempfile() }
 
     fun infer() = with(FabricModInfer) {
         TestInferScope.inferGameVersions(modFile)
