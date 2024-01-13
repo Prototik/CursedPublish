@@ -92,17 +92,32 @@ object FabricModInferSpec : FunSpec({
                 .map { it.slug } shouldContainExactlyInAnyOrder result
         }
     }
+
+    context("should infer java version") {
+        withData(nameFn = { "Java $it" }, TestInferScope.javaVersions.values.mapNotNull { it?.major }) { javaVersion ->
+            genDummyFabricMod(
+                modFile,
+                javaVersion = "$javaVersion",
+                javaVersionConstraint = "=$javaVersion"
+            )
+
+            infer().filter { it in TestInferScope.javaVersions }
+                .map { it.name } shouldContainExactlyInAnyOrder setOf("Java $javaVersion")
+        }
+    }
 })
 
 private fun genDummyFabricMod(
     file: Path,
     modId: String = "dummy",
-    modVersion: Version = Version.parse("1.2.3"),
+    modVersion: String = "1.2.3",
     minecraftVersion: String = "1.20.4",
     minecraftVersionConstraint: String = "~$minecraftVersion",
     fabricLoaderVersion: String = "0.15.0",
     fabricLoaderVersionConstraint: String = ">=$fabricLoaderVersion",
     environment: Set<FabricModInfer.Environment> = FabricModInfer.Environment.ALL,
+    javaVersion: String = "17",
+    javaVersionConstraint: String = ">=$javaVersion",
 ) {
     val manifest = Manifest()
     manifest.mainAttributes[Attributes.Name.MANIFEST_VERSION] = "1.0"
@@ -112,10 +127,11 @@ private fun genDummyFabricMod(
     val modInfo = FabricModInfer.FabricModInfo(
         schemaVersion = 1,
         id = modId,
-        version = modVersion,
+        version = Version.parse(modVersion, strict = false),
         depends = mapOf(
             "minecraft" to FabricModInfer.VersionRange(minecraftVersionConstraint),
             "fabricloader" to FabricModInfer.VersionRange(fabricLoaderVersionConstraint),
+            "java" to FabricModInfer.VersionRange(javaVersionConstraint),
         ),
         environment = environment
     )

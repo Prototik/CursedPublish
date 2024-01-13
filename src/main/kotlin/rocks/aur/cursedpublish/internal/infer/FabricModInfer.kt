@@ -77,6 +77,12 @@ internal object FabricModInfer : Infer, Named {
             }.keys
         }
 
+        modInfo.depends["java"]?.let { javaRange ->
+            this += javaVersions.filterValues {
+                it != null && it.isStable && javaRange.constraint.isSatisfiedBy(it)
+            }.keys
+        }
+
         if (Environment.Client in modInfo.environment) {
             this += environment.single { it.slug == "client" }
         }
