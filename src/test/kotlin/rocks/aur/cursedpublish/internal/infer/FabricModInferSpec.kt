@@ -5,24 +5,24 @@ package rocks.aur.cursedpublish.internal.infer
 import io.github.z4kn4fein.semver.*
 import io.kotest.core.spec.style.*
 import io.kotest.datatest.*
-import io.kotest.engine.spec.*
 import io.kotest.matchers.collections.*
 import kotlinx.serialization.*
 import org.gradle.kotlin.dsl.*
 import rocks.aur.cursedpublish.*
 import rocks.aur.cursedpublish.internal.*
 import rocks.aur.cursedpublish.testlib.*
-import java.io.*
+import java.nio.file.*
 import java.util.jar.*
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
+import kotlin.io.path.*
 
 object FabricModInferSpec : FunSpec({
-    val modFile: File by ThreadLocal.withInitial { tempfile() }
+    val modFile: Path by tempfilePerTest()
 
     fun infer() = with(FabricModInfer) {
-        TestInferScope.inferGameVersions(modFile)
+        TestInferScope.inferGameVersions(modFile.toFile())
     }
 
     test("should infer fabric loader") {
@@ -95,7 +95,7 @@ object FabricModInferSpec : FunSpec({
 })
 
 private fun genDummyFabricMod(
-    file: File,
+    file: Path,
     modId: String = "dummy",
     modVersion: Version = Version.parse("1.2.3"),
     minecraftVersion: String = "1.20.4",
