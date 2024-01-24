@@ -8,6 +8,7 @@ import org.gradle.api.provider.*
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.*
 import org.gradle.internal.*
+import org.gradle.kotlin.dsl.*
 import org.jetbrains.annotations.*
 import java.net.*
 
@@ -74,7 +75,7 @@ interface CursedPublishSpec {
     val files: NamedDomainObjectContainer<out CursedFile.Version>
 
     fun files(action: Action<in NamedDomainObjectContainer<out CursedFile.Version>>) {
-        action.execute(files)
+        action(files)
     }
 
     fun file(name: String, action: Action<in CursedFile.Version>): NamedDomainObjectProvider<out CursedFile.Version> {
@@ -89,7 +90,7 @@ interface CursedPublishSpec {
     ): NamedDomainObjectProvider<out CursedFile.Version> {
         return file(task.name) {
             from(task)
-            action.execute(this)
+            action(this)
         }
     }
 
@@ -102,7 +103,7 @@ interface CursedPublishSpec {
     ): NamedDomainObjectProvider<out CursedFile.Version> {
         return file(task.name) {
             from(task)
-            action.execute(this)
+            action(this)
         }
     }
 
@@ -130,7 +131,7 @@ interface CursedPublishSpec {
         object Default : HttpClientInitializer {
             override fun create(config: Action<in HttpClientConfig<*>>): HttpClient {
                 return HttpClient(CIO) {
-                    config.execute(this)
+                    config(this)
                 }
             }
 
@@ -140,7 +141,7 @@ interface CursedPublishSpec {
         data class WithEngine(private val engine: HttpClientEngine) : HttpClientInitializer {
             override fun create(config: Action<in HttpClientConfig<*>>): HttpClient {
                 return HttpClient(engine) {
-                    config.execute(this)
+                    config(this)
                 }
             }
         }
@@ -151,8 +152,8 @@ interface CursedPublishSpec {
         ) : HttpClientInitializer {
             override fun create(config: Action<in HttpClientConfig<*>>): HttpClient {
                 return HttpClient(factory) {
-                    factoryConfig.execute(this)
-                    config.execute(this)
+                    factoryConfig(this)
+                    config(this)
                 }
             }
         }

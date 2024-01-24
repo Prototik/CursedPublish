@@ -25,7 +25,7 @@ open class CursedPublishTask @Inject constructor(
 
     fun file(action: Action<in CursedFile.Version>) {
         file.finalizeValue()
-        action.execute(file.get())
+        action(file.get())
     }
 
     @CursedInternalApi

@@ -74,7 +74,7 @@ internal sealed class DefaultCursedFile @Inject constructor(
             vararg parameters: Any
         ): T {
             val gameVersion = objects.newInstance<T>(*parameters)
-            action.execute(gameVersion)
+            action(gameVersion)
             gameVersions.add(gameVersion)
             return gameVersion
         }

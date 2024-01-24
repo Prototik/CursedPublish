@@ -3,6 +3,7 @@ GET https://minecraft.curseforge.com/api/game/version-types
 Accept: application/json
 Accept-Charset: utf-8
 X-Api-Token: {{token}}
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0
 
 ### Get versions
 GET https://minecraft.curseforge.com/api/game/versions

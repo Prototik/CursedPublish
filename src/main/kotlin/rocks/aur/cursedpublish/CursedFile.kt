@@ -6,6 +6,7 @@ import org.gradle.api.provider.*
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.*
 import org.gradle.internal.*
+import org.gradle.kotlin.dsl.*
 import org.jetbrains.annotations.*
 import java.io.*
 
@@ -86,7 +87,7 @@ interface CursedFile : Named, Buildable {
     val relations: CursedRelations
 
     fun relations(action: Action<in CursedRelations>) {
-        action.execute(relations)
+        action(relations)
     }
 
     @Input
@@ -112,41 +113,33 @@ interface CursedFile : Named, Buildable {
         @get:Nested
         val additionalFiles: NamedDomainObjectContainer<out Additional>
 
-        fun additionalFile(name: String, action: Action<in Additional>): NamedDomainObjectProvider<out Additional> {
-            return additionalFiles.register(name, action)
-        }
+        fun additionalFile(name: String, action: Action<in Additional>): NamedDomainObjectProvider<out Additional> =
+            additionalFiles.register(name, action)
 
-        fun additionalFile(name: String): NamedDomainObjectProvider<out Additional> {
-            return additionalFile(name, Actions.doNothing())
-        }
+        fun additionalFile(name: String): NamedDomainObjectProvider<out Additional> =
+            additionalFile(name, Actions.doNothing())
 
         fun additionalFile(
             task: AbstractArchiveTask,
             action: Action<in Additional>
-        ): NamedDomainObjectProvider<out Additional> {
-            return additionalFile(task.name) {
-                from(task)
-                action.execute(this)
-            }
+        ): NamedDomainObjectProvider<out Additional> = additionalFile(task.name) {
+            from(task)
+            action(this)
         }
 
-        fun additionalFile(task: AbstractArchiveTask): NamedDomainObjectProvider<out Additional> {
-            return additionalFile(task, Actions.doNothing())
-        }
+        fun additionalFile(task: AbstractArchiveTask): NamedDomainObjectProvider<out Additional> =
+            additionalFile(task, Actions.doNothing())
 
         fun additionalFile(
             task: NamedDomainObjectProvider<out AbstractArchiveTask>,
             action: Action<in Additional>
-        ): NamedDomainObjectProvider<out Additional> {
-            return additionalFile(task.name) {
-                from(task)
-                action.execute(this)
-            }
+        ): NamedDomainObjectProvider<out Additional> = additionalFile(task.name) {
+            from(task)
+            action(this)
         }
 
-        fun additionalFile(task: NamedDomainObjectProvider<out AbstractArchiveTask>): NamedDomainObjectProvider<out Additional> {
-            return additionalFile(task, Actions.doNothing())
-        }
+        fun additionalFile(task: NamedDomainObjectProvider<out AbstractArchiveTask>): NamedDomainObjectProvider<out Additional> =
+            additionalFile(task, Actions.doNothing())
 
         @get:Input
         val gameVersions: SetProperty<out CursedGameVersion>
