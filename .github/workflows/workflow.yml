@@ -96,7 +96,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gradle: [ '8.6-rc-3', '8.5', '8.0.2', '7.0.2', '6.9.3', '6.8.3' ]
+        gradle: [ '8.6', '8.5', '8.0.2', '7.0.2', '6.9.3', '6.8.3' ]
         java: [ 8, 11, 17, 21 ]
         exclude:
           - { gradle: '8.0.2', java: 21 }
